@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Restorant {
+  id_resto            Int     @id @default(autoincrement())
+  manager_restorant   String  @db.VarChar(80)
+  city                String  @db.VarChar(100)
+  address             String  @db.Text
+  telephone_restorant String  @db.VarChar(12)
+  email_restorant     String  @db.VarChar(100)
+  branch              String  @unique @db.VarChar(100)
+  Repas               Repas[]
+  Chefs               Chefs[]
+}
+
+model Newsletter {
+  id_News          Int      @id @default(autoincrement())
+  email            String   @db.VarChar(45)
+  date_inscription DateTime @default(now())
+}
+
+model Repas {
+  id             Int         @id @default(autoincrement())
+  nom            String      @db.VarChar(255)
+  description    String?     @db.Text
+  prix           Decimal     @db.Decimal(10, 2)
+  image_url      String?     @db.VarChar(255) // Add image URL field
+  categorie_id   Int?
+  restaurant_id  Int?
+  categorierepas Categories? @relation(fields: [categorie_id], references: [id_category], onDelete: Restrict, onUpdate: Restrict, map: "repas_ibfk_1")
+  restaurant     Restorant?  @relation(fields: [restaurant_id], references: [id_resto], onDelete: Restrict, onUpdate: Restrict, map: "repas_ibfk_2")
+
+  @@index([categorie_id], map: "categorie_id")
+  @@index([restaurant_id], map: "restaurant_id")
+}
+
+model Categories {
+  id_category          Int     @id @default(autoincrement())
+  type_category        String  @unique @db.VarChar(20)
+  description_category String  @db.VarChar(45)
+  Repas                Repas[]
+}
+
+model Chefs {
+  id_chef         Int       @id @default(autoincrement())
+  name_chef       String    @db.VarChar(80)
+  designation     String    @db.Text
+  image           String    @db.Text
+  facebook        String    @db.Text
+  twitter         String    @db.Text
+  instagram       String    @db.Text
+  restorant       Restorant @relation(fields: [id_restorant_fk], references: [id_resto])
+  id_restorant_fk Int
+}
